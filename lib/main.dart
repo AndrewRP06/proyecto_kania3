@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:proyecto_kania/views/main_layout.dart';
+import 'package:proyecto_kania/views/splash_view.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
       ),
-      home: const MainLayoutView(),
+      home: const SplashView(),
     );
   }
 }

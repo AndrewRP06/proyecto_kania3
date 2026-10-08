@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "987963468381",
+    "firebase_url": "https://proyecto-arp-flutter-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "proyecto-arp-flutter",
+    "storage_bucket": "proyecto-arp-flutter.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987963468381:android:b702d25ecb51e4fa687bb4",
+        "android_client_info": {
+          "package_name": "com.ARP.proyecto_kania"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLCXb9-BoMyht63uuwZImmvp01amdc4CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987963468381:android:ea292ce7b4c24dca687bb4",
+        "android_client_info": {
+          "package_name": "com.example.poyecto_dam_2627"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLCXb9-BoMyht63uuwZImmvp01amdc4CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987963468381:android:1f4d217cab5690b2687bb4",
+        "android_client_info": {
+          "package_name": "com.example.proyecto_2dam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLCXb9-BoMyht63uuwZImmvp01amdc4CI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

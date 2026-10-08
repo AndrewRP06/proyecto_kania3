@@ -1,6 +1,10 @@
 # proyecto_kania
+Proyecto [Kartnia / Kartiana] (Nombre en deliberación por comité de 8 IAs locales)
 
-A new Flutter project.
+Una aplicación móvil, red social definitiva para la comunidad del karting. El proyecto nace para solucionar la fragmentación de los pilotos amateur, facilitando un espacio centralizado donde los usuarios pueden conectar, organizar grupos y unirse a tandas en circuitos.
+
+Estado del desarrollo: 
+Proyecto inicializado el 07/10/2026. Estructura base de clases y sistema de navegación implementados.
 
 ## Getting Started
 

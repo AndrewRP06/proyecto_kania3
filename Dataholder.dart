@@ -1,8 +1,1 @@
-
-
-
-class Dataholder{
-
-
-
-}
+export 'lib/Dataholder.dart';

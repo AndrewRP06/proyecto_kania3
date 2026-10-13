@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:proyecto_kania/Dataholder.dart';
 import 'package:proyecto_kania/views/login_view.dart';
+import 'package:proyecto_kania/views/OnBoarding.dart';
+import 'package:proyecto_kania/views/main_layout.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -28,10 +33,33 @@ class _SplashViewState extends State<SplashView> {
 
     if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginView()),
-    );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await Dataholder().loadUserData();
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainLayoutView()),
+      );
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final bool seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+
+    if (!mounted) return;
+
+    if (!seenOnboarding) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const OnBoardingView()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginView()),
+      );
+    }
   }
 
   Widget _buildCustomProgressBar(double progreso) {

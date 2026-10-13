@@ -109,13 +109,25 @@ class _PerfilViewState extends State<PerfilView> {
 
   /// Sección de Avatar e Información Personal del Piloto
   Widget _buildHeaderInfo() {
-    Widget avatarWidget = _dh.perfilUsuario.avatar ??
-        const CircleAvatar(
-          radius: 48,
-          backgroundImage: NetworkImage(
-            'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&q=80&w=200',
-          ),
-        );
+    Widget avatarWidget;
+    if (_dh.perfilUsuario.avatar != null) {
+      avatarWidget = _dh.perfilUsuario.avatar!;
+    } else if (_dh.urlAvatar?.isNotEmpty == true) {
+      avatarWidget = CircleAvatar(
+        radius: 48,
+        backgroundImage: NetworkImage(_dh.urlAvatar!),
+      );
+    } else {
+      avatarWidget = const CircleAvatar(
+        radius: 48,
+        backgroundColor: AppColores.cardOscuro,
+        child: Icon(
+          Icons.person,
+          size: 54,
+          color: AppColores.principal,
+        ),
+      );
+    }
 
     return Center(
       child: Column(
@@ -395,14 +407,14 @@ class _PerfilViewState extends State<PerfilView> {
                   'TEMPORADA 2026',
                   style: TextStyle(
                     color: AppColores.principal,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.8,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.6,
                   ),
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'Últimas carreras',
+                  'CIRCUITOS ',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 20,

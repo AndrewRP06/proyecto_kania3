@@ -7,8 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../ObjectsFirebase/Perfil.dart';
 
-/// Pantalla para editar el perfil. Es un StatefulWidget porque mientras se
-/// guarda cambia el estado (bGuardando) y hay que redibujar el botón.
+/// Pantalla para editar el perfil.
 class Editprofileview extends StatefulWidget {
   const Editprofileview({super.key});
 
@@ -16,27 +15,19 @@ class Editprofileview extends StatefulWidget {
   State<Editprofileview> createState() => _EditprofileviewState();
 }
 
-/// State de EditProfileView: controladores del formulario y métodos.
 class _EditprofileviewState extends State<Editprofileview> {
-  /// Clave del Form: permite validar todos los campos a la vez con validate().
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  /// Controladores de los campos del formulario.
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController edadController = TextEditingController();
   final TextEditingController alturaController = TextEditingController();
   final TextEditingController pesoController = TextEditingController();
 
-  /// Acceso a Cloud Firestore.
   final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  /// true mientras se está guardando en Firestore (desactiva el botón).
   bool bGuardando = false;
-
-  /// Última imagen elegida con cámara o galería; se sube al guardar.
   XFile? ficheroCargado;
 
-  /// Rellena los campos con los datos actuales del perfil.
   @override
   void initState() {
     super.initState();
@@ -47,7 +38,6 @@ class _EditprofileviewState extends State<Editprofileview> {
     pesoController.text = perfil.peso?.toString() ?? "";
   }
 
-  /// Los controladores reservan recursos: hay que liberarlos al cerrar la pantalla.
   @override
   void dispose() {
     nombreController.dispose();
@@ -57,13 +47,11 @@ class _EditprofileviewState extends State<Editprofileview> {
     super.dispose();
   }
 
-  /// Validador del nombre: no puede estar vacío.
   String? validarNombre(String? valor) {
     if (valor == null || valor.trim().isEmpty) return "Escribe tu nombre";
     return null;
   }
 
-  /// Validador de la edad: número entero entre 0 y 150.
   String? validarEdad(String? valor) {
     int? edad = int.tryParse(valor?.trim() ?? "");
     if (edad == null) return "La edad debe ser un número entero";
@@ -71,7 +59,6 @@ class _EditprofileviewState extends State<Editprofileview> {
     return null;
   }
 
-  /// Validador de la altura: número decimal mayor que 0.
   String? validarAltura(String? valor) {
     double? altura = double.tryParse((valor ?? "").trim().replaceAll(",", "."));
     if (altura == null) return "La altura debe ser un número";
@@ -79,7 +66,6 @@ class _EditprofileviewState extends State<Editprofileview> {
     return null;
   }
 
-  /// Validador del peso: número decimal mayor que 0.
   String? validarPeso(String? valor) {
     double? peso = double.tryParse((valor ?? "").trim().replaceAll(",", "."));
     if (peso == null) return "El peso debe ser un número";
@@ -87,8 +73,6 @@ class _EditprofileviewState extends State<Editprofileview> {
     return null;
   }
 
-  /// Botón "Guardar": valida, actualiza el perfil en Dataholder y en Firestore,
-  /// sube el avatar a Storage cuando hay imagen y vuelve a la pantalla anterior.
   Future<void> clickGuardar() async {
     if (!formKey.currentState!.validate()) return;
 
@@ -96,27 +80,36 @@ class _EditprofileviewState extends State<Editprofileview> {
       bGuardando = true;
     });
 
-    Perfil perfil = Dataholder.instance.perfilUsuario;
-
-    if (ficheroCargado != null) {
-      perfil.urlAvatar =
-          await Dataholder.instance.storageadmin.subirAvatar(ficheroCargado!);
-    }
-
-    perfil.name = nombreController.text.trim();
-    perfil.edad = int.parse(edadController.text.trim());
-    perfil.altura =
-        double.parse(alturaController.text.trim().replaceAll(",", "."));
-    perfil.peso =
-        double.parse(pesoController.text.trim().replaceAll(",", "."));
-
-    String uid = perfil.uid ?? FirebaseAuth.instance.currentUser!.uid;
-
     try {
+      Perfil perfil = Dataholder.instance.perfilUsuario;
+
+      // Try uploading image if selected
+      if (ficheroCargado != null) {
+        String? uploadedUrl =
+            await Dataholder.instance.storageadmin.subirAvatar(ficheroCargado!);
+        if (uploadedUrl != null) {
+          perfil.urlAvatar = uploadedUrl;
+        }
+      }
+
+      perfil.name = nombreController.text.trim();
+      perfil.edad = int.parse(edadController.text.trim());
+      perfil.altura =
+          double.parse(alturaController.text.trim().replaceAll(",", "."));
+      perfil.peso =
+          double.parse(pesoController.text.trim().replaceAll(",", "."));
+
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      String uid = perfil.uid ?? currentUser?.uid ?? 'temp_user';
+
       await db
           .collection("Perfiles")
           .doc(uid)
           .set(perfil.toFirestore(), SetOptions(merge: true));
+
+      // Synchronize Dataholder singleton from Firestore
+      await Dataholder.instance.loadUserData();
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Perfil actualizado")),
@@ -135,13 +128,12 @@ class _EditprofileviewState extends State<Editprofileview> {
     }
   }
 
-  /// Cabecera verde con degradado, el icono del usuario y su email.
   Widget crearCabecera() {
     String email = FirebaseAuth.instance.currentUser?.email ?? "";
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(AppEspacios.lg, AppEspacios.lg, AppEspacios.lg,
-          AppEspacios.xl + AppEspacios.lg),
+      padding: const EdgeInsets.fromLTRB(
+          AppEspacios.lg, AppEspacios.lg, AppEspacios.lg, AppEspacios.xl + AppEspacios.lg),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColores.principal, AppColores.oscuro],
@@ -166,20 +158,29 @@ class _EditprofileviewState extends State<Editprofileview> {
     );
   }
 
-  /// Avatar de la cabecera.
   Widget crearAvatar() {
     Image? avatar = Dataholder.instance.perfilUsuario.avatar;
+    String? urlAvatar = Dataholder.instance.urlAvatar;
     double tamano = AppEspacios.iconoGrande + AppEspacios.xl;
-    if (avatar == null) {
+
+    if (avatar != null) {
+      return ClipOval(
+        child: SizedBox(width: tamano, height: tamano, child: avatar),
+      );
+    } else if (urlAvatar?.isNotEmpty == true) {
+      return ClipOval(
+        child: SizedBox(
+          width: tamano,
+          height: tamano,
+          child: Image.network(urlAvatar!, fit: BoxFit.cover),
+        ),
+      );
+    } else {
       return Icon(Icons.account_circle_rounded,
           size: tamano, color: AppColores.sobrePrincipal);
     }
-    return ClipOval(
-      child: SizedBox(width: tamano, height: tamano, child: avatar),
-    );
   }
 
-  /// Botón "Avatar Cámara"
   void elegirAvatarCamara() async {
     ImagePicker imagePicker = ImagePicker();
 
@@ -194,7 +195,6 @@ class _EditprofileviewState extends State<Editprofileview> {
     });
   }
 
-  /// Botón "Avatar Galería"
   void elegirAvatarGaleria() async {
     ImagePicker imagePicker = ImagePicker();
 
@@ -209,12 +209,40 @@ class _EditprofileviewState extends State<Editprofileview> {
     });
   }
 
-  /// Dibuja la pantalla de edición.
+  InputDecoration _buildInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Color(0xFF888888)),
+      prefixIcon: Icon(icon, color: AppColores.principal),
+      filled: true,
+      fillColor: AppColores.cardOscuro,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF2A2A2A)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF2A2A2A)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColores.principal, width: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColores.oscuro,
       appBar: AppBar(
-        title: const Text("PERFIL"),
+        backgroundColor: AppColores.oscuro,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          "PERFIL",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
       body: SafeArea(
         top: false,
@@ -233,6 +261,11 @@ class _EditprofileviewState extends State<Editprofileview> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppEspacios.md),
                       child: Card(
+                        color: AppColores.cardOscuro,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: const BorderSide(color: Color(0xFF262626)),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(AppEspacios.lg),
                           child: Form(
@@ -243,60 +276,73 @@ class _EditprofileviewState extends State<Editprofileview> {
                                 TextFormField(
                                   controller: nombreController,
                                   validator: validarNombre,
+                                  style: const TextStyle(color: Colors.white),
                                   textCapitalization: TextCapitalization.words,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
-                                      labelText: "Nombre",
-                                      prefixIcon:
-                                          Icon(Icons.person_outline_rounded)),
+                                  decoration: _buildInputDecoration(
+                                      "Nombre", Icons.person_outline_rounded),
                                 ),
                                 const SizedBox(height: AppEspacios.md),
                                 TextFormField(
                                   controller: edadController,
                                   validator: validarEdad,
+                                  style: const TextStyle(color: Colors.white),
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
-                                      labelText: "Edad",
-                                      prefixIcon: Icon(Icons.cake_outlined)),
+                                  decoration: _buildInputDecoration(
+                                      "Edad", Icons.cake_outlined),
                                 ),
                                 const SizedBox(height: AppEspacios.md),
                                 TextFormField(
                                   controller: alturaController,
                                   validator: validarAltura,
+                                  style: const TextStyle(color: Colors.white),
                                   keyboardType: const TextInputType.numberWithOptions(
                                       decimal: true),
                                   textInputAction: TextInputAction.next,
-                                  decoration: const InputDecoration(
-                                      labelText: "Altura (m)",
-                                      prefixIcon: Icon(Icons.height_rounded)),
+                                  decoration: _buildInputDecoration(
+                                      "Altura (m)", Icons.height_rounded),
                                 ),
                                 const SizedBox(height: AppEspacios.md),
                                 TextFormField(
                                   controller: pesoController,
                                   validator: validarPeso,
+                                  style: const TextStyle(color: Colors.white),
                                   keyboardType: const TextInputType.numberWithOptions(
                                       decimal: true),
                                   textInputAction: TextInputAction.done,
                                   onFieldSubmitted: (_) => clickGuardar(),
-                                  decoration: const InputDecoration(
-                                      labelText: "Peso (kg)",
-                                      prefixIcon: Icon(Icons.monitor_weight_outlined)),
+                                  decoration: _buildInputDecoration(
+                                      "Peso (kg)", Icons.monitor_weight_outlined),
                                 ),
                                 const SizedBox(height: AppEspacios.md),
                                 Row(
                                   children: [
                                     Expanded(
                                       child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColores.principal,
+                                          side: const BorderSide(color: AppColores.principal),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
                                         onPressed: elegirAvatarCamara,
-                                        child: const Text("Avatar Camara"),
+                                        child: const Text("Cámara"),
                                       ),
                                     ),
                                     const SizedBox(width: AppEspacios.md),
                                     Expanded(
                                       child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColores.principal,
+                                          side: const BorderSide(color: AppColores.principal),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
                                         onPressed: elegirAvatarGaleria,
-                                        child: const Text("Avatar Galeria"),
+                                        child: const Text("Galería"),
                                       ),
                                     ),
                                   ],
@@ -306,6 +352,13 @@ class _EditprofileviewState extends State<Editprofileview> {
                                   children: [
                                     Expanded(
                                       child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.white70,
+                                          side: const BorderSide(color: Color(0xFF444444)),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
                                         onPressed: bGuardando
                                             ? null
                                             : () => Navigator.pop(context),
@@ -315,6 +368,12 @@ class _EditprofileviewState extends State<Editprofileview> {
                                     const SizedBox(width: AppEspacios.md),
                                     Expanded(
                                       child: FilledButton(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: AppColores.principal,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                        ),
                                         onPressed:
                                             bGuardando ? null : clickGuardar,
                                         child: bGuardando

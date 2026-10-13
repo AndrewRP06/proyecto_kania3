@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto_kania/Dataholder.dart';
+import 'package:proyecto_kania/theme/AppTheme.dart';
 import 'register_view.dart';
 import 'main_layout.dart';
 
@@ -56,11 +57,11 @@ class _LoginViewState extends State<LoginView> {
           message = 'Credenciales incorrectas.';
         }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
+          SnackBar(content: Text(message), backgroundColor: AppColores.error),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColores.error),
         );
       } finally {
         if (mounted) {
@@ -74,12 +75,8 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryOrange = Color(0xFFE54622);
-    const darkBackground = Color(0xFF111111);
-    const cardDark = Color(0xFF1B1B1B);
-
     return Scaffold(
-      backgroundColor: darkBackground,
+      backgroundColor: AppColores.oscuro,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -94,13 +91,13 @@ class _LoginViewState extends State<LoginView> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primaryOrange.withAlpha(30),
+                        color: AppColores.principal.withAlpha(30),
                         shape: BoxShape.circle,
-                        border: Border.all(color: primaryOrange, width: 2),
+                        border: Border.all(color: AppColores.principal, width: 2),
                       ),
                       child: const Icon(
                         Icons.sports_motorsports,
-                        color: primaryOrange,
+                        color: AppColores.principal,
                         size: 48,
                       ),
                     ),
@@ -116,14 +113,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Inicia sesión con Firebase para gestionar tu perfil SWS',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF888888),
-                      fontSize: 14,
-                    ),
-                  ),
                   const SizedBox(height: 36),
 
                   // Email Field
@@ -133,9 +122,9 @@ class _LoginViewState extends State<LoginView> {
                     decoration: InputDecoration(
                       labelText: 'Correo electrónico',
                       labelStyle: const TextStyle(color: Color(0xFF888888)),
-                      prefixIcon: const Icon(Icons.email_outlined, color: primaryOrange),
+                      prefixIcon: const Icon(Icons.email_outlined, color: AppColores.principal),
                       filled: true,
-                      fillColor: cardDark,
+                      fillColor: AppColores.cardOscuro,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(color: Color(0xFF2A2A2A)),
@@ -146,7 +135,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: primaryOrange, width: 2),
+                        borderSide: const BorderSide(color: AppColores.principal, width: 2),
                       ),
                     ),
                     validator: (value) {
@@ -169,7 +158,7 @@ class _LoginViewState extends State<LoginView> {
                     decoration: InputDecoration(
                       labelText: 'Contraseña',
                       labelStyle: const TextStyle(color: Color(0xFF888888)),
-                      prefixIcon: const Icon(Icons.lock_outline, color: primaryOrange),
+                      prefixIcon: const Icon(Icons.lock_outline, color: AppColores.principal),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -182,7 +171,7 @@ class _LoginViewState extends State<LoginView> {
                         },
                       ),
                       filled: true,
-                      fillColor: cardDark,
+                      fillColor: AppColores.cardOscuro,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(color: Color(0xFF2A2A2A)),
@@ -193,7 +182,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: primaryOrange, width: 2),
+                        borderSide: const BorderSide(color: AppColores.principal, width: 2),
                       ),
                     ),
                     validator: (value) {
@@ -212,7 +201,7 @@ class _LoginViewState extends State<LoginView> {
                   ElevatedButton(
                     onPressed: _isLoading ? null : _onLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryOrange,
+                      backgroundColor: AppColores.principal,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -259,7 +248,7 @@ class _LoginViewState extends State<LoginView> {
                         child: const Text(
                           'Regístrate',
                           style: TextStyle(
-                            color: primaryOrange,
+                            color: AppColores.principal,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

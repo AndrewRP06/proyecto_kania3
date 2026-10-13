@@ -16,6 +16,7 @@ class AppEspacios {
   static const double lg = 24.0;
   static const double xl = 32.0;
   static const double iconoGrande = 48.0;
+  static const double iconoGrande2 = 90.0;
   static const double anchoFormulario = 400.0;
 }
 

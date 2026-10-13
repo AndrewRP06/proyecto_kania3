@@ -7,12 +7,25 @@ import 'ObjectsFirebase/Perfil.dart';
 class StorageAdmin {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  Future<String> subirAvatar(XFile fichero) async {
-    final bytes = await fichero.readAsBytes();
-    final fileName = 'avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final ref = _storage.ref().child(fileName);
-    final uploadTask = await ref.putData(bytes);
-    return await uploadTask.ref.getDownloadURL();
+  Future<String?> subirAvatar(XFile fichero) async {
+    try {
+      final bytes = await fichero.readAsBytes();
+      if (bytes.isEmpty) return null;
+
+      final fileName = 'avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final ref = _storage.ref().child(fileName);
+
+      // Set timeout to prevent hanging indefinitely on Web/Storage rules issue
+      await ref.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      ).timeout(const Duration(seconds: 10));
+
+      return await ref.getDownloadURL();
+    } catch (e) {
+      // Return null on storage failure or timeout
+      return null;
+    }
   }
 }
 
@@ -32,6 +45,7 @@ class Dataholder {
   String get email => userData?['email'] ?? currentUser?.email ?? '';
   String get swsId => userData?['swsId'] ?? 'ES-ITK-${currentUser?.uid.substring(0, 6).toUpperCase() ?? "000000"}';
   String get country => userData?['country'] ?? 'España';
+  String? get urlAvatar => perfilUsuario.urlAvatar ?? userData?['urlAvatar'];
   int get races => (userData?['races'] as num?)?.toInt() ?? 0;
   int get podiums => (userData?['podiums'] as num?)?.toInt() ?? 0;
   int get points => (userData?['points'] as num?)?.toInt() ?? 0;
@@ -61,6 +75,7 @@ class Dataholder {
             'country': 'España',
             'edad': 25,
             'altura': 1.75,
+            'peso': 70.0,
             'races': 0,
             'podiums': 0,
             'points': 0,

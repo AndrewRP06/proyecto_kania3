@@ -9,7 +9,8 @@ class Dataholder {
   User? currentUser;
   Map<String, dynamic>? userData;
 
-  // Convenience getters for user profile
+
+
   String get name => userData?['name'] ?? currentUser?.displayName ?? 'Piloto SWS';
   String get email => userData?['email'] ?? currentUser?.email ?? '';
   String get swsId => userData?['swsId'] ?? 'ES-ITK-${currentUser?.uid.substring(0, 6).toUpperCase() ?? "000000"}';
@@ -21,7 +22,6 @@ class Dataholder {
   int get nationalRank => (userData?['nationalRank'] as num?)?.toInt() ?? 0;
   String get rankChange => userData?['rankChange'] ?? '+0 puestos';
 
-  // Load user data from Firestore or initialize default if document doesn't exist
   Future<void> loadUserData() async {
     currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {

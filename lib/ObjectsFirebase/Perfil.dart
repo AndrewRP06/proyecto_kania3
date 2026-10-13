@@ -5,6 +5,7 @@ class Perfil {
   String? name;
   int? edad;
   double? altura;
+  double? peso;
   String? urlAvatar;
   Image? avatar;
 
@@ -13,6 +14,7 @@ class Perfil {
     this.name,
     this.edad,
     this.altura,
+    this.peso,
     this.urlAvatar,
     this.avatar,
   });
@@ -23,6 +25,7 @@ class Perfil {
       name: map['name'] as String?,
       edad: (map['edad'] as num?)?.toInt(),
       altura: (map['altura'] as num?)?.toDouble(),
+      peso: (map['peso'] as num?)?.toDouble(),
       urlAvatar: map['urlAvatar'] as String?,
     );
   }
@@ -32,6 +35,7 @@ class Perfil {
       if (name != null) 'name': name,
       if (edad != null) 'edad': edad,
       if (altura != null) 'altura': altura,
+      if (peso != null) 'peso': peso,
       if (urlAvatar != null) 'urlAvatar': urlAvatar,
     };
   }

@@ -21,10 +21,11 @@ class _EditprofileviewState extends State<Editprofileview> {
   /// Clave del Form: permite validar todos los campos a la vez con validate().
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  /// Controladores de los tres campos del formulario.
+  /// Controladores de los campos del formulario.
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController edadController = TextEditingController();
   final TextEditingController alturaController = TextEditingController();
+  final TextEditingController pesoController = TextEditingController();
 
   /// Acceso a Cloud Firestore.
   final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -43,6 +44,7 @@ class _EditprofileviewState extends State<Editprofileview> {
     nombreController.text = perfil.name ?? "";
     edadController.text = perfil.edad?.toString() ?? "";
     alturaController.text = perfil.altura?.toString() ?? "";
+    pesoController.text = perfil.peso?.toString() ?? "";
   }
 
   /// Los controladores reservan recursos: hay que liberarlos al cerrar la pantalla.
@@ -51,6 +53,7 @@ class _EditprofileviewState extends State<Editprofileview> {
     nombreController.dispose();
     edadController.dispose();
     alturaController.dispose();
+    pesoController.dispose();
     super.dispose();
   }
 
@@ -76,6 +79,14 @@ class _EditprofileviewState extends State<Editprofileview> {
     return null;
   }
 
+  /// Validador del peso: número decimal mayor que 0.
+  String? validarPeso(String? valor) {
+    double? peso = double.tryParse((valor ?? "").trim().replaceAll(",", "."));
+    if (peso == null) return "El peso debe ser un número";
+    if (peso <= 0) return "Peso no válido";
+    return null;
+  }
+
   /// Botón "Guardar": valida, actualiza el perfil en Dataholder y en Firestore,
   /// sube el avatar a Storage cuando hay imagen y vuelve a la pantalla anterior.
   Future<void> clickGuardar() async {
@@ -96,6 +107,8 @@ class _EditprofileviewState extends State<Editprofileview> {
     perfil.edad = int.parse(edadController.text.trim());
     perfil.altura =
         double.parse(alturaController.text.trim().replaceAll(",", "."));
+    perfil.peso =
+        double.parse(pesoController.text.trim().replaceAll(",", "."));
 
     String uid = perfil.uid ?? FirebaseAuth.instance.currentUser!.uid;
 
@@ -253,11 +266,22 @@ class _EditprofileviewState extends State<Editprofileview> {
                                   validator: validarAltura,
                                   keyboardType: const TextInputType.numberWithOptions(
                                       decimal: true),
-                                  textInputAction: TextInputAction.done,
-                                  onFieldSubmitted: (_) => clickGuardar(),
+                                  textInputAction: TextInputAction.next,
                                   decoration: const InputDecoration(
                                       labelText: "Altura (m)",
                                       prefixIcon: Icon(Icons.height_rounded)),
+                                ),
+                                const SizedBox(height: AppEspacios.md),
+                                TextFormField(
+                                  controller: pesoController,
+                                  validator: validarPeso,
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                      decimal: true),
+                                  textInputAction: TextInputAction.done,
+                                  onFieldSubmitted: (_) => clickGuardar(),
+                                  decoration: const InputDecoration(
+                                      labelText: "Peso (kg)",
+                                      prefixIcon: Icon(Icons.monitor_weight_outlined)),
                                 ),
                                 const SizedBox(height: AppEspacios.md),
                                 Row(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_kania/Dataholder.dart';
+import 'EditProfile_view.dart';
 import 'login_view.dart';
 
 class PerfilView extends StatefulWidget {
@@ -82,7 +83,15 @@ class _PerfilViewState extends State<PerfilView> {
                       child: IconButton(
                         icon: const Icon(Icons.edit,
                             color: Colors.white, size: 18),
-                        onPressed: () {},
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Editprofileview(),
+                            ),
+                          );
+                          if (mounted) setState(() {});
+                        },
                       ),
                     ),
                   ],

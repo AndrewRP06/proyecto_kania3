@@ -1,17 +1,34 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'ObjectsFirebase/Perfil.dart';
+
+class StorageAdmin {
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  Future<String> subirAvatar(XFile fichero) async {
+    final bytes = await fichero.readAsBytes();
+    final fileName = 'avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final ref = _storage.ref().child(fileName);
+    final uploadTask = await ref.putData(bytes);
+    return await uploadTask.ref.getDownloadURL();
+  }
+}
 
 class Dataholder {
   static final Dataholder _instance = Dataholder._internal();
   factory Dataholder() => _instance;
+  static Dataholder get instance => _instance;
   Dataholder._internal();
 
   User? currentUser;
   Map<String, dynamic>? userData;
+  Perfil perfilUsuario = Perfil();
+  StorageAdmin storageadmin = StorageAdmin();
 
-
-
-  String get name => userData?['name'] ?? currentUser?.displayName ?? 'Piloto SWS';
+  // Convenience getters for user profile
+  String get name => perfilUsuario.name ?? userData?['name'] ?? currentUser?.displayName ?? 'Piloto SWS';
   String get email => userData?['email'] ?? currentUser?.email ?? '';
   String get swsId => userData?['swsId'] ?? 'ES-ITK-${currentUser?.uid.substring(0, 6).toUpperCase() ?? "000000"}';
   String get country => userData?['country'] ?? 'España';
@@ -22,15 +39,17 @@ class Dataholder {
   int get nationalRank => (userData?['nationalRank'] as num?)?.toInt() ?? 0;
   String get rankChange => userData?['rankChange'] ?? '+0 puestos';
 
+  // Load user data from Firestore or initialize default if document doesn't exist
   Future<void> loadUserData() async {
     currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       try {
-        final docRef = FirebaseFirestore.instance.collection('users').doc(currentUser!.uid);
+        final docRef = FirebaseFirestore.instance.collection('Perfiles').doc(currentUser!.uid);
         final docSnap = await docRef.get();
 
         if (docSnap.exists && docSnap.data() != null) {
           userData = docSnap.data();
+          perfilUsuario = Perfil.fromFirestore(userData!, currentUser!.uid);
         } else {
           // Default profile for new user
           userData = {
@@ -40,6 +59,8 @@ class Dataholder {
             'email': currentUser!.email ?? '',
             'swsId': 'ES-ITK-${currentUser!.uid.substring(0, 6).toUpperCase()}',
             'country': 'España',
+            'edad': 25,
+            'altura': 1.75,
             'races': 0,
             'podiums': 0,
             'points': 0,
@@ -49,6 +70,7 @@ class Dataholder {
             'createdAt': FieldValue.serverTimestamp(),
           };
           await docRef.set(userData!);
+          perfilUsuario = Perfil.fromFirestore(userData!, currentUser!.uid);
         }
       } catch (e) {
         // Fallback in case of network issue
@@ -60,5 +82,6 @@ class Dataholder {
     await FirebaseAuth.instance.signOut();
     currentUser = null;
     userData = null;
+    perfilUsuario = Perfil();
   }
 }

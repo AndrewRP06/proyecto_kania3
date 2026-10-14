@@ -105,7 +105,8 @@ class _EditprofileviewState extends State<Editprofileview> {
       await db
           .collection("Perfiles")
           .doc(uid)
-          .set(perfil.toFirestore(), SetOptions(merge: true));
+          .set(perfil.toFirestore(), SetOptions(merge: true))
+          .timeout(const Duration(seconds: 8));
 
       // Synchronize Dataholder singleton from Firestore
       await Dataholder.instance.loadUserData();
@@ -117,14 +118,17 @@ class _EditprofileviewState extends State<Editprofileview> {
       Navigator.pop(context);
     } catch (error) {
       if (!mounted) return;
-      setState(() {
-        bGuardando = false;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text("No se pudo guardar: $error"),
             backgroundColor: AppColores.error),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          bGuardando = false;
+        });
+      }
     }
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:proyecto_kania/Dataholder.dart';
 import 'package:proyecto_kania/theme/AppTheme.dart';
 import 'register_view.dart';
@@ -69,6 +71,56 @@ class _LoginViewState extends State<LoginView> {
             _isLoading = false;
           });
         }
+      }
+    }
+  }
+
+  Future<void> _onGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (kIsWeb) {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      } else {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+        if (googleUser == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        await FirebaseAuth.instance.signInWithCredential(credential);
+      }
+
+      await Dataholder().loadUserData();
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainLayoutView()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al iniciar sesión con Google: $e'),
+          backgroundColor: AppColores.error,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -225,6 +277,49 @@ class _LoginViewState extends State<LoginView> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Divider
+                  Row(
+                    children: const [
+                      Expanded(child: Divider(color: Color(0xFF2A2A2A))),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Text(
+                          'O',
+                          style: TextStyle(color: Color(0xFF888888)),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Color(0xFF2A2A2A))),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Google Sign-In Button
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _onGoogleSignIn,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: AppColores.cardOscuro,
+                      side: const BorderSide(color: Color(0xFF2A2A2A)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    icon: const Icon(
+                      Icons.g_mobiledata,
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      'Iniciar sesión con Google',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
 

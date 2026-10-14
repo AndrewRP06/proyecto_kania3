@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -15,13 +16,13 @@ class StorageAdmin {
       final fileName = 'avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = _storage.ref().child(fileName);
 
-      // Set timeout to prevent hanging indefinitely on Web/Storage rules issue
+      // Timeout to prevent hanging on Web CORS/Storage rule issue
       await ref.putData(
         bytes,
         SettableMetadata(contentType: 'image/jpeg'),
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 8));
 
-      return await ref.getDownloadURL();
+      return await ref.getDownloadURL().timeout(const Duration(seconds: 8));
     } catch (e) {
       // Return null on storage failure or timeout
       return null;
@@ -59,7 +60,7 @@ class Dataholder {
     if (currentUser != null) {
       try {
         final docRef = FirebaseFirestore.instance.collection('Perfiles').doc(currentUser!.uid);
-        final docSnap = await docRef.get();
+        final docSnap = await docRef.get().timeout(const Duration(seconds: 8));
 
         if (docSnap.exists && docSnap.data() != null) {
           userData = docSnap.data();
@@ -84,7 +85,7 @@ class Dataholder {
             'rankChange': '+0 puestos',
             'createdAt': FieldValue.serverTimestamp(),
           };
-          await docRef.set(userData!);
+          await docRef.set(userData!).timeout(const Duration(seconds: 8));
           perfilUsuario = Perfil.fromFirestore(userData!, currentUser!.uid);
         }
       } catch (e) {

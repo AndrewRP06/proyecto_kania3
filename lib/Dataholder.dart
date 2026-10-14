@@ -15,8 +15,6 @@ class StorageAdmin {
 
       final fileName = 'avatars/${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = _storage.ref().child(fileName);
-
-      // Timeout to prevent hanging on Web CORS/Storage rule issue
       await ref.putData(
         bytes,
         SettableMetadata(contentType: 'image/jpeg'),

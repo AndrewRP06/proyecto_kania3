@@ -125,35 +125,16 @@ class _SplashViewState extends State<SplashView> {
               child: ClipOval(
                 child: Container(
                   color: const Color(0xFF1B1B1B),
-                  child: Image.network(
-                    'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-vzroZsz5OFai9oofSgYDeG_mTLxuFzM-dgD9VlC_SA&s=10',
+                  child: Image.asset(
+                    'assets/images/imagen_de_carga.png',
                     width: 160,
                     height: 160,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        width: 160,
-                        height: 160,
-                        color: const Color(0xFF1B1B1B),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: primaryOrange,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      );
-                    },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         width: 160,
                         height: 160,
                         color: const Color(0xFF1B1B1B),
-                        child: const Icon(
-                          Icons.sports_motorsports,
-                          size: 80,
-                          color: primaryOrange,
-                        ),
                       );
                     },
                   ),

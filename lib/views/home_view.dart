@@ -23,7 +23,7 @@ class HomeView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Menu Icon Header
+
               Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
@@ -311,7 +311,7 @@ class HomeView extends StatelessWidget {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 1.1,
+                      childAspectRatio: 1.0,
                     ),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),

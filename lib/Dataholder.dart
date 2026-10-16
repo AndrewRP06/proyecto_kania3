@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -57,24 +58,28 @@ class Dataholder {
     currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       try {
-        final docRef = FirebaseFirestore.instance.collection('Perfiles').doc(currentUser!.uid);
+        final docRef = Perfil.collectionRef.doc(currentUser!.uid);
         final docSnap = await docRef.get().timeout(const Duration(seconds: 8));
 
         if (docSnap.exists && docSnap.data() != null) {
-          userData = docSnap.data();
-          perfilUsuario = Perfil.fromFirestore(userData!, currentUser!.uid);
+          perfilUsuario = docSnap.data()!;
+          userData = perfilUsuario.toFirestore();
         } else {
           // Default profile for new user
-          userData = {
-            'name': currentUser!.displayName?.isNotEmpty == true 
+          perfilUsuario = Perfil(
+            uid: currentUser!.uid,
+            name: currentUser!.displayName?.isNotEmpty == true 
                 ? currentUser!.displayName 
                 : 'Piloto SWS',
+            edad: 25,
+            altura: 1.75,
+            peso: 70.0,
+          );
+          userData = {
+            ...perfilUsuario.toFirestore(),
             'email': currentUser!.email ?? '',
             'swsId': 'ES-ITK-${currentUser!.uid.substring(0, 6).toUpperCase()}',
             'country': 'España',
-            'edad': 25,
-            'altura': 1.75,
-            'peso': 70.0,
             'races': 0,
             'podiums': 0,
             'points': 0,
@@ -83,11 +88,69 @@ class Dataholder {
             'rankChange': '+0 puestos',
             'createdAt': FieldValue.serverTimestamp(),
           };
-          await docRef.set(userData!).timeout(const Duration(seconds: 8));
-          perfilUsuario = Perfil.fromFirestore(userData!, currentUser!.uid);
+          await FirebaseFirestore.instance
+              .collection('Perfiles')
+              .doc(currentUser!.uid)
+              .set(userData!)
+              .timeout(const Duration(seconds: 8));
         }
+
+        // Sincronizar y sumar puntos automáticamente desde el historial en Firestore
+        await actualizarPuntosUsuario();
       } catch (e) {
         // Fallback in case of network issue
+      }
+    }
+  }
+
+  Future<void> actualizarPuntosUsuario() async {
+    if (currentUser == null) return;
+    try {
+      final historialSnap = await FirebaseFirestore.instance
+          .collection('Perfiles')
+          .doc(currentUser!.uid)
+          .collection('historial_circuitos')
+          .get()
+          .timeout(const Duration(seconds: 8));
+
+      int totalPuntos = 0;
+      int totalCarreras = historialSnap.docs.length;
+      int totalPodios = 0;
+
+      for (var doc in historialSnap.docs) {
+        final data = doc.data();
+        final puntosStr = (data['puntos'] ?? '+0 pts').toString();
+        final numStr = puntosStr.replaceAll(RegExp(r'[^0-9]'), '');
+        totalPuntos += int.tryParse(numStr) ?? 0;
+
+        final pos = (data['posicion'] ?? '').toString();
+        if (pos == 'P1' || pos == 'P2' || pos == 'P3') {
+          totalPodios++;
+        }
+      }
+
+      await FirebaseFirestore.instance
+          .collection('Perfiles')
+          .doc(currentUser!.uid)
+          .update({
+            'points': totalPuntos,
+            'races': totalCarreras,
+            'podiums': totalPodios,
+          })
+          .timeout(const Duration(seconds: 8));
+
+      // Recargar datos locales del usuario
+      final docSnap = await Perfil.collectionRef.doc(currentUser!.uid).get();
+      if (docSnap.exists && docSnap.data() != null) {
+        perfilUsuario = docSnap.data()!;
+        userData = perfilUsuario.toFirestore();
+        userData?['points'] = totalPuntos;
+        userData?['races'] = totalCarreras;
+        userData?['podiums'] = totalPodios;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Error actualizando puntos: $e');
       }
     }
   }

@@ -37,7 +37,7 @@ class CarreraCard extends StatelessWidget {
                   'assets/images/imagen_de_carrera.jpg',
                   height: 160,
                   width: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) =>
                       Container(height: 160, color: const Color(0xFF222222)),
                 ),

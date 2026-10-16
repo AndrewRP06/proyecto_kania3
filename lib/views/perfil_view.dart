@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_kania/Dataholder.dart';
+import 'package:proyecto_kania/ObjectsFirebase/historial_circuito.dart';
 import 'package:proyecto_kania/theme/AppTheme.dart';
 import 'EditProfile_view.dart';
 import 'login_view.dart';
@@ -193,26 +194,40 @@ class _PerfilViewState extends State<PerfilView> {
     );
   }
 
-  /// Barra de Estadísticas Rápidas (Carreras, Podios, Puntos)
+  /// Barra de Estadísticas Rápidas (Carreras, Podios, Puntos dinámicos del historial)
   Widget _buildStatsContainer() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      decoration: BoxDecoration(
-        color: AppColores.cardOscuro,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: const Color(0xFF2A2A2A)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildStatItem(_dh.races.toString(), 'CARRERAS'),
-          _buildStatDivider(),
-          _buildStatItem(_dh.podiums.toString(), 'PODIOS'),
-          _buildStatDivider(),
-          _buildStatItem(_dh.points.toString(), 'PUNTOS'),
-        ],
-      ),
+    return StreamBuilder<List<HistorialCircuito>>(
+      stream: HistorialCircuito.obtenerHistorialStream(),
+      builder: (context, snapshot) {
+        final historial = snapshot.data ?? [];
+        int totalPuntos = 0;
+        for (var item in historial) {
+          final numStr = item.puntos.replaceAll(RegExp(r'[^0-9]'), '');
+          totalPuntos += int.tryParse(numStr) ?? 0;
+        }
+        final puntosFinales = totalPuntos > 0 ? totalPuntos.toString() : _dh.points.toString();
+        final carrerasFinales = historial.isNotEmpty ? historial.length.toString() : _dh.races.toString();
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          decoration: BoxDecoration(
+            color: AppColores.cardOscuro,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: const Color(0xFF2A2A2A)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildStatItem(carrerasFinales, 'CARRERAS'),
+              _buildStatDivider(),
+              _buildStatItem(_dh.podiums.toString(), 'PODIOS'),
+              _buildStatDivider(),
+              _buildStatItem(puntosFinales, 'PUNTOS'),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -392,7 +407,7 @@ class _PerfilViewState extends State<PerfilView> {
     );
   }
 
-  /// Sección de Últimas Carreras
+  /// Sección de Últimas Carreras (Dinámica desde Firestore)
   Widget _buildRecentRacesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,7 +429,7 @@ class _PerfilViewState extends State<PerfilView> {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'CIRCUITOS ',
+                  'CIRCUITOS',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 20,
@@ -434,28 +449,44 @@ class _PerfilViewState extends State<PerfilView> {
           ],
         ),
         const SizedBox(height: 16),
-        _buildRaceItem(
-          position: 'P2',
-          isPodium: false,
-          title: 'Karting Campillos',
-          date: '06 OCT 2026',
-          points: '+142 pts',
-        ),
-        const SizedBox(height: 12),
-        _buildRaceItem(
-          position: 'P5',
-          isPodium: false,
-          title: 'Circuito de Madrid',
-          date: '21 SEP 2026',
-          points: '+96 pts',
-        ),
-        const SizedBox(height: 12),
-        _buildRaceItem(
-          position: 'P1',
-          isPodium: true,
-          title: 'Karting Sevilla',
-          date: '07 SEP 2026',
-          points: '+180 pts',
+        StreamBuilder<List<HistorialCircuito>>(
+          stream: HistorialCircuito.obtenerHistorialStream(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(color: AppColores.principal),
+                ),
+              );
+            }
+
+            final historial = snapshot.data ?? [];
+
+            if (historial.isEmpty) {
+              return const Text(
+                'No hay historial de circuitos registrado',
+                style: TextStyle(color: Color(0xFF777777), fontSize: 13),
+              );
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: historial.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final item = historial[index];
+                return _buildRaceItem(
+                  position: item.posicion,
+                  isPodium: item.isPodium,
+                  title: item.nombre,
+                  date: item.fecha,
+                  points: item.puntos,
+                );
+              },
+            );
+          },
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Perfil {
   String? uid;
@@ -39,4 +40,14 @@ class Perfil {
       if (urlAvatar != null) 'urlAvatar': urlAvatar,
     };
   }
+
+  // Referencia a Firestore con conversión tipada (withConverter)
+  static CollectionReference<Perfil> get collectionRef =>
+      FirebaseFirestore.instance
+          .collection('Perfiles')
+          .withConverter<Perfil>(
+            fromFirestore: (snapshot, _) =>
+                Perfil.fromFirestore(snapshot.data() ?? {}, snapshot.id),
+            toFirestore: (perfil, _) => perfil.toFirestore(),
+          );
 }

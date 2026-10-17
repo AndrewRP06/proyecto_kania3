@@ -232,7 +232,7 @@ class _RankingViewState extends State<RankingView> {
                                   separatorBuilder: (context, index) => const SizedBox(height: 10),
                                   itemBuilder: (context, index) {
                                     final data = docs[index].data();
-                                    final name = data['name'] ?? 'Piloto SWS';
+                                    final name = data['name'] ?? 'Piloto';
                                     final races = (data['races'] as num?)?.toInt() ?? 0;
                                     final points = (data['points'] as num?)?.toInt() ?? 0;
                                     final rank = index + 1;

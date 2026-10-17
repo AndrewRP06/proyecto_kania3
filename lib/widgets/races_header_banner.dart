@@ -18,12 +18,12 @@ class RacesHeaderBanner extends StatelessWidget {
         children: [
           Image.network(
             'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=900&q=85',
-            height: 240,
+            height: 260,
             width: double.infinity,
             fit: BoxFit.cover,
           ),
           Container(
-            height: 240,
+            height: 260,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -37,13 +37,13 @@ class RacesHeaderBanner extends StatelessWidget {
           ),
           Positioned.fill(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: primaryOrange,
                       borderRadius: BorderRadius.circular(12),
@@ -65,21 +65,21 @@ class RacesHeaderBanner extends StatelessWidget {
                         'Tu próxima\ncarrera empieza\naquí.',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                           height: 1.15,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       const Text(
                         'Encuentra pruebas oficiales, preinscríbete y suma puntos para el ranking.',
                         style: TextStyle(
                           color: Colors.white70,
                           fontSize: 12,
-                          height: 1.3,
+                          height: 1.25,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Column(
@@ -89,7 +89,7 @@ class RacesHeaderBanner extends StatelessWidget {
                                 '$totalCarreras',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 22,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -106,7 +106,7 @@ class RacesHeaderBanner extends StatelessWidget {
                           ),
                           const SizedBox(width: 24),
                           Container(
-                            height: 28,
+                            height: 24,
                             width: 1,
                             color: Colors.white30,
                           ),
@@ -118,7 +118,7 @@ class RacesHeaderBanner extends StatelessWidget {
                                 '6',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 22,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

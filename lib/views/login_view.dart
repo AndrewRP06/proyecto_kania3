@@ -43,10 +43,7 @@ class _LoginViewState extends State<LoginView> {
         await Dataholder().loadUserData();
 
         if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainLayoutView()),
-        );
+        Navigator.pushReplacementNamed(context, '/main');
       } on FirebaseAuthException catch (e) {
         String message = 'Error al iniciar sesión';
         if (e.code == 'user-not-found') {
@@ -104,10 +101,7 @@ class _LoginViewState extends State<LoginView> {
       await Dataholder().loadUserData();
 
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainLayoutView()),
-      );
+      Navigator.pushReplacementNamed(context, '/main');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -333,12 +327,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterView(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/register');
                         },
                         child: const Text(
                           'Regístrate',

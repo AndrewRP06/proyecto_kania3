@@ -42,7 +42,7 @@ class CarreraCard extends StatelessWidget {
                       Container(height: 160, color: const Color(0xFF222222)),
                 ),
               ),
-              // Badge de Categoría
+
               Positioned(
                 left: 16,
                 top: 16,
@@ -53,7 +53,7 @@ class CarreraCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
-                    'SWS RACE',
+                    'CARRERA OFICIAL',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -63,7 +63,7 @@ class CarreraCard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Badge de Fecha desde Firestore
+
               if (carrera.fecha.isNotEmpty)
                 Positioned(
                   right: 16,

@@ -17,23 +17,18 @@ class _OnBoardingViewState extends State<OnBoardingView> {
   final List<Map<String, dynamic>> _slides = const [
     {
       'icon': Icons.sports_motorsports,
-      'title': 'Bienvenido a Kania SWS',
+      'title': 'Bienvenido a Kania',
       'subtitle': 'Tu plataforma integral para gestionar tu carrera en el mundo del karting.',
     },
     {
       'icon': Icons.flag_rounded,
       'title': 'Carreras y Circuitos',
-      'subtitle': 'Descubre próximos eventos, apúntate a carreras y consulta detalles de cada circuito.',
+      'subtitle': 'Descubre próximos eventos, inscríbete y consulta detalles de cada circuito.',
     },
     {
       'icon': Icons.emoji_events_rounded,
-      'title': 'Estadísticas y Podios',
-      'subtitle': 'Lleva un registro preciso de tus victorias, podios y puntos acumulados.',
-    },
-    {
-      'icon': Icons.leaderboard_rounded,
-      'title': 'Ranking Nacional',
-      'subtitle': 'Compite con otros pilotos y escala posiciones en la clasificación oficial.',
+      'title': 'Ranking y Estadísticas',
+      'subtitle': 'Suma puntos en cada prueba y escala posiciones en la clasificación oficial.',
     },
   ];
 
@@ -42,10 +37,7 @@ class _OnBoardingViewState extends State<OnBoardingView> {
     await prefs.setBool('seen_onboarding', true);
 
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginView()),
-    );
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override

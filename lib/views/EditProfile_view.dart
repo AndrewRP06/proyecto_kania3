@@ -55,21 +55,25 @@ class _EditprofileviewState extends State<Editprofileview> {
   String? validarEdad(String? valor) {
     int? edad = int.tryParse(valor?.trim() ?? "");
     if (edad == null) return "La edad debe ser un número entero";
-    if (edad < 0 || edad > 150) return "Edad no válida";
+    if (edad < 4 || edad > 80) return "Ingresa una edad válida (entre 4 y 80 años)";
     return null;
   }
 
   String? validarAltura(String? valor) {
     double? altura = double.tryParse((valor ?? "").trim().replaceAll(",", "."));
-    if (altura == null) return "La altura debe ser un número";
-    if (altura <= 0) return "Altura no válida";
+    if (altura == null) return "La altura debe ser un número (ej. 1.75)";
+    if (altura < 0.80 || altura > 2.30) {
+      return "Ingresa una altura humana válida (0.80m - 2.30m)";
+    }
     return null;
   }
 
   String? validarPeso(String? valor) {
     double? peso = double.tryParse((valor ?? "").trim().replaceAll(",", "."));
-    if (peso == null) return "El peso debe ser un número";
-    if (peso <= 0) return "Peso no válido";
+    if (peso == null) return "El peso debe ser un número (ej. 70)";
+    if (peso < 20.0 || peso > 300.0) {
+      return "Ingresa un peso humano válido (20kg - 300kg)";
+    }
     return null;
   }
 

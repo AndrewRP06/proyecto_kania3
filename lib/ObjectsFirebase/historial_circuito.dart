@@ -23,7 +23,7 @@ class HistorialCircuito {
     final isPod = (map['isPodium'] ?? (pos == 'P1')) as bool;
     return HistorialCircuito(
       uid: docId,
-      nombre: (map['nombre'] ?? map['Nombre'] ?? 'Circuito SWS').toString(),
+      nombre: (map['nombre'] ?? map['Nombre'] ?? 'Circuito').toString(),
       posicion: pos,
       puntos: (map['puntos'] ?? map['Puntos'] ?? '+100 pts').toString(),
       fecha: (map['fecha'] ?? map['Fecha'] ?? '01 OCT 2026').toString(),

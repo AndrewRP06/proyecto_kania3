@@ -80,10 +80,7 @@ class CircuitoCard extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RacesView()),
-                    );
+                    Navigator.pushNamed(context, '/races');
                   },
                   child: const Text(
                     'Ver carreras en este circuito',

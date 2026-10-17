@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:proyecto_kania/Dataholder.dart';
 import 'package:proyecto_kania/ObjectsFirebase/historial_circuito.dart';
 import 'package:proyecto_kania/theme/AppTheme.dart';
-import 'EditProfile_view.dart';
-import 'login_view.dart';
 
 class PerfilView extends StatefulWidget {
   const PerfilView({super.key});
@@ -75,10 +75,7 @@ class _PerfilViewState extends State<PerfilView> {
             onPressed: () async {
               await _dh.signOut();
               if (!context.mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginView()),
-              );
+              Navigator.pushReplacementNamed(context, '/login');
             },
             tooltip: 'Cerrar sesión',
           ),
@@ -92,12 +89,7 @@ class _PerfilViewState extends State<PerfilView> {
             child: IconButton(
               icon: const Icon(Icons.edit, color: Colors.white, size: 18),
               onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Editprofileview(),
-                  ),
-                );
+                await Navigator.pushNamed(context, '/edit_profile');
                 if (mounted) setState(() {});
               },
               tooltip: 'Editar perfil',
@@ -164,7 +156,7 @@ class _PerfilViewState extends State<PerfilView> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'PILOTO SWS',
+            'PILOTO',
             style: TextStyle(
               color: AppColores.principal,
               fontSize: 12,
@@ -199,6 +191,9 @@ class _PerfilViewState extends State<PerfilView> {
     return StreamBuilder<List<HistorialCircuito>>(
       stream: HistorialCircuito.obtenerHistorialStream(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SizedBox.shrink();
+        }
         final historial = snapshot.data ?? [];
         int totalPuntos = 0;
         for (var item in historial) {
@@ -290,120 +285,143 @@ class _PerfilViewState extends State<PerfilView> {
     );
   }
 
-  /// Tarjetas de Ranking Nacional y Victorias
+  /// Tarjetas de Ranking Nacional y Victorias (Ranking calculado dinámicamente)
   Widget _buildRankingAndVictoriesRow() {
-    return Row(
-      children: [
-        // Ranking Nacional Card (Naranja)
-        Expanded(
-          flex: 11,
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: AppColores.principal,
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.bar_chart, color: Colors.white, size: 24),
-                const SizedBox(height: 12),
-                const Text(
-                  'RANKING NACIONAL',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
+    final currentUid = FirebaseAuth.instance.currentUser?.uid;
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('Perfiles')
+          .orderBy('points', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        int calculatedRank = 1;
+        if (snapshot.hasData && currentUid != null) {
+          final docs = snapshot.data!.docs;
+          for (int i = 0; i < docs.length; i++) {
+            if (docs[i].id == currentUid) {
+              calculatedRank = i + 1;
+              break;
+            }
+          }
+        } else if (_dh.nationalRank > 0) {
+          calculatedRank = _dh.nationalRank;
+        }
+
+        return Row(
+          children: [
+            // Ranking Nacional Card (Naranja)
+            Expanded(
+              flex: 11,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: AppColores.principal,
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
-                const SizedBox(height: 4),
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Icon(Icons.bar_chart, color: Colors.white, size: 24),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'RANKING NACIONAL',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          '#$calculatedRank',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(50),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _dh.rankChange,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Victorias Card (Blanco)
+            Expanded(
+              flex: 9,
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(5),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColores.principal.withAlpha(20),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.emoji_events_outlined,
+                          color: AppColores.principal, size: 20),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
-                      '#${_dh.nationalRank}',
+                      _dh.victories.toString(),
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
+                        color: Colors.black87,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(50),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        _dh.rankChange,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'VICTORIAS',
+                      style: TextStyle(
+                        color: Color(0xFF888888),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Victorias Card (Blanco)
-        Expanded(
-          flex: 9,
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(5),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColores.principal.withAlpha(20),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.emoji_events_outlined,
-                      color: AppColores.principal, size: 20),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _dh.victories.toString(),
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                const Text(
-                  'VICTORIAS',
-                  style: TextStyle(
-                    color: Color(0xFF888888),
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -458,6 +476,13 @@ class _PerfilViewState extends State<PerfilView> {
                   padding: EdgeInsets.all(16.0),
                   child: CircularProgressIndicator(color: AppColores.principal),
                 ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Text(
+                'Error al cargar historial: ${snapshot.error}',
+                style: const TextStyle(color: AppColores.error, fontSize: 13),
               );
             }
 

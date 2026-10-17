@@ -41,7 +41,7 @@ class Dataholder {
   StorageAdmin storageadmin = StorageAdmin();
 
   // Convenience getters for user profile
-  String get name => perfilUsuario.name ?? userData?['name'] ?? currentUser?.displayName ?? 'Piloto SWS';
+  String get name => perfilUsuario.name ?? userData?['name'] ?? currentUser?.displayName ?? 'Piloto';
   String get email => userData?['email'] ?? currentUser?.email ?? '';
   String get swsId => userData?['swsId'] ?? 'ES-ITK-${currentUser?.uid.substring(0, 6).toUpperCase() ?? "000000"}';
   String get country => userData?['country'] ?? 'España';
@@ -70,7 +70,7 @@ class Dataholder {
             uid: currentUser!.uid,
             name: currentUser!.displayName?.isNotEmpty == true 
                 ? currentUser!.displayName 
-                : 'Piloto SWS',
+                : 'Piloto',
             edad: 25,
             altura: 1.75,
             peso: 70.0,

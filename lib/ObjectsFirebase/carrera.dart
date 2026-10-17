@@ -18,17 +18,17 @@ class Carrera {
 
   // Getters para compatibilidad con la interfaz
   String get titulo => nombre;
-  String get categoria => 'SWS RACE';
+  String get categoria => 'CARRERA OFICIAL';
   String get lugar => circuito;
   String get dia => fecha;
   String get mes => '';
-  String get plazas => 'SWS OFFICIAL';
+  String get plazas => 'PLAZAS DISPONIBLES';
   String get imagenUrl => '';
 
   factory Carrera.fromMap(Map<String, dynamic> map, String docId) {
     return Carrera(
       uid: docId,
-      nombre: (map['Nombre'] ?? map['nombre'] ?? map['titulo'] ?? 'Carrera SWS').toString(),
+      nombre: (map['Nombre'] ?? map['nombre'] ?? map['titulo'] ?? 'Carrera').toString(),
       circuito: (map['Circuito'] ?? map['circuito'] ?? 'Circuito').toString(),
       fecha: (map['Fecha'] ?? map['fecha'] ?? 'Próximamente').toString(),
       imagenAsset: 'assets/images/imagen_de_carrera.jpg',

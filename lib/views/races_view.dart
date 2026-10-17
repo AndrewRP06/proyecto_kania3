@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_kania/ObjectsFirebase/carrera.dart';
+import 'package:proyecto_kania/ObjectsFirebase/circuito.dart';
 import 'package:proyecto_kania/widgets/carrera_card.dart';
 import 'package:proyecto_kania/widgets/races_header_banner.dart';
 import 'package:proyecto_kania/widgets/races_tab_selector.dart';
@@ -16,8 +17,8 @@ class _RacesViewState extends State<RacesView> {
 
   void _mostrarDialogoCrearCarrera(BuildContext context) {
     final nombreController = TextEditingController();
-    final circuitoController = TextEditingController();
     final fechaController = TextEditingController();
+    String? circuitoSeleccionado;
     final formKey = GlobalKey<FormState>();
     bool isLoading = false;
 
@@ -56,34 +57,97 @@ class _RacesViewState extends State<RacesView> {
                         validator: (v) => v == null || v.isEmpty ? 'Introduce el nombre' : null,
                       ),
                       const SizedBox(height: 12),
-                      TextFormField(
-                        controller: circuitoController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: 'Circuito',
-                          labelStyle: const TextStyle(color: Colors.white70),
-                          filled: true,
-                          fillColor: const Color(0xFF262626),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        validator: (v) => v == null || v.isEmpty ? 'Introduce el circuito' : null,
+                      
+                      // Seleccionable de Circuitos desde Firestore
+                      FutureBuilder<List<Circuito>>(
+                        future: Circuito.obtenerCircuitosFirestore(),
+                        builder: (context, snapshot) {
+                          final circuitos = snapshot.data ?? [];
+                          final nombres = circuitos.map((c) => c.nombre).where((n) => n.isNotEmpty).toSet().toList();
+                          
+                          if (nombres.isEmpty) {
+                            nombres.addAll(['Karting Cabanillas', 'Henakart', 'Karting Los Santos']);
+                          }
+
+                          return DropdownButtonFormField<String>(
+                            initialValue: circuitoSeleccionado,
+                            dropdownColor: const Color(0xFF262626),
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: 'Selecciona un Circuito',
+                              labelStyle: const TextStyle(color: Colors.white70),
+                              filled: true,
+                              fillColor: const Color(0xFF262626),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            items: nombres.map((nombreCircuito) {
+                              return DropdownMenuItem<String>(
+                                value: nombreCircuito,
+                                child: Text(
+                                  nombreCircuito,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                circuitoSeleccionado = value;
+                              });
+                            },
+                            validator: (v) => v == null || v.isEmpty ? 'Selecciona un circuito' : null,
+                          );
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: fechaController,
+                        readOnly: true,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          labelText: 'Fecha (ej: 18 OCT)',
+                          labelText: 'Selecciona la fecha',
                           labelStyle: const TextStyle(color: Colors.white70),
+                          prefixIcon: const Icon(Icons.calendar_month, color: Color(0xFFE54622)),
                           filled: true,
                           fillColor: const Color(0xFF262626),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        validator: (v) => v == null || v.isEmpty ? 'Introduce la fecha' : null,
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2030),
+                            builder: (context, child) {
+                              return Theme(
+                                data: ThemeData.dark().copyWith(
+                                  colorScheme: const ColorScheme.dark(
+                                    primary: Color(0xFFE54622),
+                                    onPrimary: Colors.white,
+                                    surface: Color(0xFF1B1B1B),
+                                    onSurface: Colors.white,
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            const meses = [
+                              'ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
+                              'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'
+                            ];
+                            final dia = picked.day.toString().padLeft(2, '0');
+                            final mes = meses[picked.month - 1];
+                            setDialogState(() {
+                              fechaController.text = '$dia $mes';
+                            });
+                          }
+                        },
+                        validator: (v) => v == null || v.isEmpty ? 'Selecciona una fecha válida' : null,
                       ),
                     ],
                   ),
@@ -112,7 +176,7 @@ class _RacesViewState extends State<RacesView> {
                             try {
                               await Carrera.crearCarrera(
                                 nombre: nombreController.text.trim(),
-                                circuito: circuitoController.text.trim(),
+                                circuito: circuitoSeleccionado ?? 'Karting Cabanillas',
                                 fecha: fechaController.text.trim(),
                               );
                               if (context.mounted) {
@@ -290,6 +354,23 @@ class _RacesViewState extends State<RacesView> {
                           );
                         }
 
+                        if (snapshot.hasError) {
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20.0),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withAlpha(20),
+                              borderRadius: BorderRadius.circular(16.0),
+                              border: Border.all(color: Colors.redAccent),
+                            ),
+                            child: Text(
+                              'Error al cargar carreras: ${snapshot.error}',
+                              style: const TextStyle(color: Colors.redAccent),
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        }
+
                         final todasLasCarreras = snapshot.data ?? [];
 
                         if (todasLasCarreras.isEmpty) {
@@ -344,6 +425,23 @@ class _RacesViewState extends State<RacesView> {
                             child: Padding(
                               padding: EdgeInsets.all(32.0),
                               child: CircularProgressIndicator(color: primaryOrange),
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20.0),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withAlpha(20),
+                              borderRadius: BorderRadius.circular(16.0),
+                              border: Border.all(color: Colors.redAccent),
+                            ),
+                            child: Text(
+                              'Error al cargar tus carreras: ${snapshot.error}',
+                              style: const TextStyle(color: Colors.redAccent),
+                              textAlign: TextAlign.center,
                             ),
                           );
                         }
@@ -420,7 +518,7 @@ class _RacesViewState extends State<RacesView> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              'Explora el calendario completo de carreras SWS.',
+                              'Explora el calendario completo de carreras.',
                               style: TextStyle(
                                 color: Colors.white60,
                                 fontSize: 12,

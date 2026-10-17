@@ -36,7 +36,7 @@ class HomeView extends StatelessWidget {
                     icon: const Icon(Icons.menu, color: Colors.white),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Menú principal Kania SWS')),
+                        const SnackBar(content: Text('Menú principal Kania')),
                       );
                     },
                   ),
@@ -110,12 +110,7 @@ class HomeView extends StatelessWidget {
                                 const SizedBox(height: 12),
                                 GestureDetector(
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const RacesView(),
-                                      ),
-                                    );
+                                    Navigator.pushNamed(context, '/races');
                                   },
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -162,12 +157,7 @@ class HomeView extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RacesView(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/races');
                       },
                       child: Container(
                         height: 110,
@@ -199,12 +189,7 @@ class HomeView extends StatelessWidget {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RankingView(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/ranking');
                       },
                       child: Container(
                         height: 110,
@@ -272,12 +257,7 @@ class HomeView extends StatelessWidget {
                     child: IconButton(
                       icon: const Icon(Icons.arrow_forward, color: Colors.white, size: 10),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RacesView(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/races');
                       },
                     ),
                   ),
@@ -292,6 +272,17 @@ class HomeView extends StatelessWidget {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(color: AppColores.principal),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: Text(
+                          'Error al cargar circuitos: ${snapshot.error}',
+                          style: const TextStyle(color: AppColores.error),
+                        ),
+                      ),
                     );
                   }
                   final circuitos = snapshot.data ?? [];

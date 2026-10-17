@@ -11,6 +11,7 @@ import 'package:proyecto_kania/views/home_view.dart';
 import 'package:proyecto_kania/views/races_view.dart';
 import 'package:proyecto_kania/views/ranking_view.dart';
 import 'package:proyecto_kania/views/perfil_view.dart';
+import 'package:proyecto_kania/views/EditProfile_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
         }
 
         // Si el usuario está autenticado, permitir acceso a la ruta protegida solicitada
-        Widget protectedView = const HomeView();
+        Widget protectedView = const MainLayoutView();
         switch (settings.name) {
           case '/main':
             protectedView = const MainLayoutView();
@@ -92,6 +93,9 @@ class MyApp extends StatelessWidget {
             break;
           case '/perfil':
             protectedView = const PerfilView();
+            break;
+          case '/edit_profile':
+            protectedView = const Editprofileview();
             break;
           default:
             protectedView = const MainLayoutView();

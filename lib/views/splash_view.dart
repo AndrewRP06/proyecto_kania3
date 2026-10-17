@@ -37,10 +37,7 @@ class _SplashViewState extends State<SplashView> {
     if (user != null) {
       await Dataholder().loadUserData();
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainLayoutView()),
-      );
+      Navigator.pushReplacementNamed(context, '/main');
       return;
     }
 
@@ -50,15 +47,9 @@ class _SplashViewState extends State<SplashView> {
     if (!mounted) return;
 
     if (!seenOnboarding) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnBoardingView()),
-      );
+      Navigator.pushReplacementNamed(context, '/onboarding');
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginView()),
-      );
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -143,7 +134,7 @@ class _SplashViewState extends State<SplashView> {
             ),
             const SizedBox(height: 32),
             const Text(
-              'KANIA SWS',
+              'KANIA',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,

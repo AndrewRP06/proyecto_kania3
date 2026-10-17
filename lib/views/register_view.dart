@@ -50,11 +50,7 @@ class _RegisterViewState extends State<RegisterView> {
         await Dataholder().loadUserData();
 
         if (!mounted) return;
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const MainLayoutView()),
-          (route) => false,
-        );
+        Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
       } on FirebaseAuthException catch (e) {
         String message = 'Error al registrarse';
         if (e.code == 'weak-password') {
@@ -108,7 +104,7 @@ class _RegisterViewState extends State<RegisterView> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Crea tu cuenta SWS',
+                    'Crea tu cuenta Kania',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,

@@ -77,6 +77,29 @@ Los modelos de Firestore se encuentran en `lib/ObjectsFirebase/`. Las coleccione
 
 Para probar las pantallas con contenido, crea documentos de prueba en Firestore con los campos que leen los modelos y revisa las reglas de acceso. Los datos de Firestore no se incluyen en el repositorio.
 
-## Dependencias
+## Paquetes utilizados
 
-Las dependencias de Flutter se declaran en `pubspec.yaml` y sus versiones resueltas se registran en `pubspec.lock`. Después de clonar el proyecto, `flutter pub get` las descarga.
+Los paquetes y rangos de versión declarados en pubspec.yaml son:
+
+### Dependencias de la aplicación
+
+| Paquete | Versión | Uso en el proyecto |
+|---|---:|---|
+| lutter | SDK | Interfaz, navegación y widgets de la aplicación. |
+| cloud_firestore | ^6.10.0 | Lectura y escritura de perfiles, carreras, circuitos e historial en Firestore. |
+| irebase_core | ^4.14.0 | Inicialización de Firebase. |
+| irebase_auth | ^6.7.0 | Registro, inicio y cierre de sesión. |
+| irebase_storage | ^13.6.0 | Subida y almacenamiento de imágenes de perfil. |
+| image_picker | ^1.1.2 | Selección de imágenes desde el dispositivo. |
+| google_sign_in | ^6.2.2 | Inicio de sesión con Google. |
+| shared_preferences | ^2.2.2 | Guardado local de la preferencia de onboarding visto. |
+| cupertino_icons | ^1.0.8 | Paquete de iconos Cupertino incluido en las dependencias del proyecto. |
+
+### Dependencias de desarrollo
+
+| Paquete | Versión | Uso |
+|---|---:|---|
+| lutter_test | SDK | Herramientas de pruebas de Flutter. |
+| lutter_lints | ^6.0.0 | Reglas recomendadas de análisis estático para Dart y Flutter. |
+
+pubspec.lock registra las versiones exactas resueltas, incluidas las dependencias transitivas. Para instalarlas tras clonar el repositorio, ejecuta lutter pub get.
